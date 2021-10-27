@@ -780,9 +780,9 @@ interface IUniswapV2Router {
   function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts);
 }
 
-interface BuybackContract {
-    function depositByContract(address account, uint amount) external;
-}
+//interface BuybackContract {
+//    function depositByContract(address account, uint amount) external;
+//}
 
 contract ConstantReturnStaking is Ownable {
     using Address for address;
@@ -805,7 +805,7 @@ contract ConstantReturnStaking is Ownable {
     
     event TrustedDepositContractAdded(address contractAddress);
     event TrustedDepositContractRemoved(address contractAddress);
-    event BuybackContractChanged(address contractAddress);
+    //event BuybackContractChanged(address contractAddress);
     event FeeRecipientAddressChanged(address newAddress);
     
     event EmergencyDeclared(address indexed owner);
@@ -813,30 +813,34 @@ contract ConstantReturnStaking is Ownable {
     // ============================= CONTRACT VARIABLES ==============================
     
     // stake token contract address
-    address public TRUSTED_DEPOSIT_TOKEN_ADDRESS;
-    address public TRUSTED_REWARD_TOKEN_ADDRESS;
-    address public TRUSTED_BUYBACK_CONTRACT_ADDRESS;
+    address public TRUSTED_DEPOSIT_TOKEN_ADDRESS = 0x9194a964a6FAe46569b60280c0E715fB780e1011;
+    address public TRUSTED_REWARD_TOKEN_ADDRESS = 0xFA7a078C689129f1459A2b7c5e8F10dAF9098a9A;
+    //address public TRUSTED_BUYBACK_CONTRACT_ADDRESS;
     
     // earnings reward rate
-    uint public REWARD_RATE_X_100;
-    uint public REWARD_INTERVAL;
+    uint public REWARD_RATE_X_100 = 10000;
+    uint public REWARD_INTERVAL = 30 minutes;
     
     // staking fee
-    uint public STAKING_FEE_RATE_X_100;
+    uint public STAKING_FEE_RATE_X_100 = 0;
     
     // unstaking fee 
-    uint public UNSTAKING_FEE_RATE_X_100;
+    uint public UNSTAKING_FEE_RATE_X_100 = 0;
     
     // this portion of earned rewards go to referrer
-    uint public REFERRAL_FEE_RATE_X_100;
+    uint public REFERRAL_FEE_RATE_X_100 = 500;
     
     // unstaking possible after LOCKUP_TIME
-    uint public LOCKUP_TIME;
+    uint public LOCKUP_TIME = 5 minutes;
     
-    uint public constant EMERGENCY_WAIT_TIME = 3 days;
+    uint public constant EMERGENCY_WAIT_TIME = 10 minutes;
+
+    // If there are any undistributed or unclaimed tokens left in contract after this time
+    // Admin can claim them
+    uint public constant adminCanClaimAfter = 15 minutes;
     
     // Uniswap v2 Router
-    IUniswapV2Router public uniswapV2Router;
+    IUniswapV2Router public uniswapV2Router = IUniswapV2Router(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
     
     // ========================= END CONTRACT VARIABLES ==============================
     
@@ -878,6 +882,7 @@ contract ConstantReturnStaking is Ownable {
     mapping (address => bool) public isTrustedDepositContract;
     
     uint public adminClaimableTime;
+
     constructor(
         address _uniswapV2RouterAddress,
         address _feeRecipientAddress,
@@ -892,8 +897,7 @@ contract ConstantReturnStaking is Ownable {
         uint rewardRateX100,
         uint rewardInterval,
         
-        uint lockupTime,
-        uint adminCanClaimAfter
+        uint lockupTime
 
         ) public {
             
@@ -918,7 +922,7 @@ contract ConstantReturnStaking is Ownable {
         
         contractStartTime = now;
         
-        require(adminCanClaimAfter <= 395 days, "Admin Claimable Time should be less than 395 days!");
+        //require(adminCanClaimAfter <= 395 days, "Admin Claimable Time should be less than 395 days!");
         adminClaimableTime = now.add(adminCanClaimAfter);
         
     }
@@ -927,12 +931,12 @@ contract ConstantReturnStaking is Ownable {
         feeRecipientAddress = newFeeRecipientAddress;
         emit FeeRecipientAddressChanged(feeRecipientAddress);
     }
-    
-    function setBuybackContractAddress(address trustedBuybackContractAddress) external onlyOwner {
-        require(trustedBuybackContractAddress != address(0), "Invalid address!");
-        TRUSTED_BUYBACK_CONTRACT_ADDRESS = trustedBuybackContractAddress;
-        emit BuybackContractChanged(TRUSTED_BUYBACK_CONTRACT_ADDRESS);
-    }
+
+    //function setBuybackContractAddress(address trustedBuybackContractAddress) external onlyOwner {
+    //    require(trustedBuybackContractAddress != address(0), "Invalid address!");
+    //    TRUSTED_BUYBACK_CONTRACT_ADDRESS = trustedBuybackContractAddress;
+    //    emit BuybackContractChanged(TRUSTED_BUYBACK_CONTRACT_ADDRESS);
+    //}
     
     function setStakingFeeRateX100(uint _newStakingFeeRateX100) public onlyOwner {
         require(_newStakingFeeRateX100 < 100e2, "New Staking fee too much!");
@@ -1133,7 +1137,7 @@ contract ConstantReturnStaking is Ownable {
         emit Stake(account, amount);
     }
     
-    function stake(uint amountToStake, address referrer, uint _amountOutMin_referralFee, uint _amountOutMin_75Percent, uint _deadline) external noContractsAllowed notDuringEmergency {
+    function stake(uint amountToStake, address referrer, uint _amountOutMin_referralFee, uint _deadline) external noContractsAllowed notDuringEmergency {
         require(amountToStake > 0, "Cannot deposit 0 Tokens");
         IERC20(TRUSTED_DEPOSIT_TOKEN_ADDRESS).safeTransferFrom(msg.sender, address(this), amountToStake);
         
@@ -1145,17 +1149,17 @@ contract ConstantReturnStaking is Ownable {
             IERC20(TRUSTED_DEPOSIT_TOKEN_ADDRESS).safeTransfer(feeRecipientAddress, fee);
         }
         
-        uint _75Percent = amountAfterFee.mul(75e2).div(100e2);
+        //uint _75Percent = amountAfterFee.mul(75e2).div(100e2);
+
+        //uint contractDepositAmount = doSwap(TRUSTED_DEPOSIT_TOKEN_ADDRESS, TRUSTED_REWARD_TOKEN_ADDRESS, _75Percent, _amountOutMin_75Percent, _deadline);
+
+        //IERC20(TRUSTED_REWARD_TOKEN_ADDRESS).safeApprove(TRUSTED_BUYBACK_CONTRACT_ADDRESS, 0);
+        //IERC20(TRUSTED_REWARD_TOKEN_ADDRESS).safeApprove(TRUSTED_BUYBACK_CONTRACT_ADDRESS, contractDepositAmount);
+        //BuybackContract(TRUSTED_BUYBACK_CONTRACT_ADDRESS).depositByContract(msg.sender, contractDepositAmount);
         
-        uint contractDepositAmount = doSwap(TRUSTED_DEPOSIT_TOKEN_ADDRESS, TRUSTED_REWARD_TOKEN_ADDRESS, _75Percent, _amountOutMin_75Percent, _deadline);
+        //uint remainingAmount = amountAfterFee.sub(_75Percent);
         
-        IERC20(TRUSTED_REWARD_TOKEN_ADDRESS).safeApprove(TRUSTED_BUYBACK_CONTRACT_ADDRESS, 0);
-        IERC20(TRUSTED_REWARD_TOKEN_ADDRESS).safeApprove(TRUSTED_BUYBACK_CONTRACT_ADDRESS, contractDepositAmount);
-        BuybackContract(TRUSTED_BUYBACK_CONTRACT_ADDRESS).depositByContract(msg.sender, contractDepositAmount);
-        
-        uint remainingAmount = amountAfterFee.sub(_75Percent);
-        
-        depositedTokens[msg.sender] = depositedTokens[msg.sender].add(remainingAmount);
+        depositedTokens[msg.sender] = depositedTokens[msg.sender].add(amountAfterFee);
         
         holders.add(msg.sender);
         
@@ -1167,7 +1171,7 @@ contract ConstantReturnStaking is Ownable {
         activeReferredAddressesOfUser[referrals[msg.sender]].add(msg.sender);
         
         stakingTime[msg.sender] = now;
-        emit Stake(msg.sender, remainingAmount);
+        emit Stake(msg.sender, amountAfterFee);
     }
     
     function unstake(uint amountToWithdraw, uint _amountOutMin_referralFee, uint _deadline) external noContractsAllowed {
