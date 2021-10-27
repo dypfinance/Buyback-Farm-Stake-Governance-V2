@@ -807,8 +807,8 @@ contract ConstantReturnStaking_BuyBack is Ownable {
     
     event Reinvest(address account, uint amount);
     
-    event TrustedDepositContractAdded(address contractAddress);
-    event TrustedDepositContractRemoved(address contractAddress);
+    //event TrustedDepositContractAdded(address contractAddress);
+    //event TrustedDepositContractRemoved(address contractAddress);
     event StakingContractChanged(address contractAddress);
     event FeeRecipientAddressChanged(address newAddress);
     
@@ -872,7 +872,7 @@ contract ConstantReturnStaking_BuyBack is Ownable {
     
     mapping (address => uint) public rewardsPendingClaim;
     
-    mapping (address => bool) public isTrustedDepositContract;
+    //mapping (address => bool) public isTrustedDepositContract;
     
     uint public adminClaimableTime;
     address public feeRecipientAddress;
@@ -945,19 +945,19 @@ contract ConstantReturnStaking_BuyBack is Ownable {
         emit LockupTimeChanged(LOCKUP_TIME);
     }
     
-    function addTrustedDepositContractAddress(address _address) external onlyOwner {
-        isTrustedDepositContract[_address] = true;
-        emit TrustedDepositContractAdded(_address);
-    }
-    function removeTrustedDepositContractAddress(address _address) external onlyOwner {
-        isTrustedDepositContract[_address] = false;
-        emit TrustedDepositContractRemoved(_address);
-    }
+    //function addTrustedDepositContractAddress(address _address) external onlyOwner {
+    //    isTrustedDepositContract[_address] = true;
+    //    emit TrustedDepositContractAdded(_address);
+    //}
+    //function removeTrustedDepositContractAddress(address _address) external onlyOwner {
+    //    isTrustedDepositContract[_address] = false;
+    //    emit TrustedDepositContractRemoved(_address);
+    //}
     
-    modifier onlyTrustedDepositContract() {
-        require(isTrustedDepositContract[msg.sender], "Not trusted deposit contract!");
-        _;
-    }
+    //modifier onlyTrustedDepositContract() {
+    //    require(isTrustedDepositContract[msg.sender], "Not trusted deposit contract!");
+    //    _;
+    //}
     
     function setContractVariables(
         uint lockupTime,
@@ -1073,20 +1073,20 @@ contract ConstantReturnStaking_BuyBack is Ownable {
         return holders.length();
     }
     
-    function depositByContract(address account, uint amount) external onlyTrustedDepositContract {
-        require(amount > 0, "Amount must not be 0!");
-        require(account != address(0), "Invalid account!");
-        IERC20(TRUSTED_DEPOSIT_TOKEN_ADDRESS).safeTransferFrom(msg.sender, address(this), amount);
-        
-        updateAccount(account);
-        
-        depositedTokens[account] = depositedTokens[account].add(amount);
-        
-        holders.add(account);
-    
-        stakingTime[account] = now;
-        emit Stake(account, amount);
-    }
+    //function depositByContract(address account, uint amount) external onlyTrustedDepositContract {
+    //    require(amount > 0, "Amount must not be 0!");
+    //    require(account != address(0), "Invalid account!");
+    //    IERC20(TRUSTED_DEPOSIT_TOKEN_ADDRESS).safeTransferFrom(msg.sender, address(this), amount);
+    //
+    //    updateAccount(account);
+    //
+    //    depositedTokens[account] = depositedTokens[account].add(amount);
+    //
+    //     holders.add(account);
+    //
+    //    stakingTime[account] = now;
+    //    emit Stake(account, amount);
+    //}
     
     function stake(uint amountToDeposit, 
         address depositToken, 
