@@ -907,44 +907,44 @@ contract FarmProRata is Ownable {
     // these contracts (and uniswap pair & router) are "trusted" 
     // and checked to not contain re-entrancy pattern
     // to safely avoid checks-effects-interactions where needed to simplify logic
-    address public constant trustedDepositTokenAddress = address(0); // uniswap pair address
+    address public constant trustedDepositTokenAddress = 0xB8901d76732bd05F7E40990fd48D1d304E79C9B5; // uniswap pair address
     
     // token used for rewards - this must be one of the tokens in uniswap pair.
-    address public constant trustedRewardTokenAddress = address(0); 
+    address public constant trustedRewardTokenAddress = 0xFA7a078C689129f1459A2b7c5e8F10dAF9098a9A;
 
-    address public constant trustedStakingContractAddress = address(0);
+    address public constant trustedStakingContractAddress = 0xc50E20B721C0659784C6dA88DB3c9E8b0F20DbCe;
 
     
     // the main token which is normally claimed as reward
-    address public constant trustedPlatformTokenAddress = address(0);
+    address public constant trustedPlatformTokenAddress = 0x9194a964a6FAe46569b60280c0E715fB780e1011;
     
     // the other token in the uniswap pair used
-    address public constant trustedBaseTokenAddress = address(0);
+    address public constant trustedBaseTokenAddress = 0xc778417E063141139Fce010982780140Aa0cD5Ab;
     
     // Make sure to double-check BURN_ADDRESS
     address public constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
     
     // cliffTime - withdraw is not possible within cliffTime of deposit
-    uint public cliffTime = 7 days;
+    uint public cliffTime = 5 minutes;
 
     // Amount of tokens
     uint public constant disburseAmount = 216000e18;
     // To be disbursed continuously over this duration
-    uint public constant disburseDuration = 365 days;
+    uint public constant disburseDuration = 1 days;
     
     // If there are any undistributed or unclaimed tokens left in contract after this time
     // Admin can claim them
-    uint public constant adminCanClaimAfter = 395 days;
+    uint public constant adminCanClaimAfter = 1 hours;
     
     // delays between attempted swaps
-    uint public constant swapAttemptPeriod = 1 days;
+    uint public constant swapAttemptPeriod = 10 minutes;
     // delays between attempted burns or token disbursement
-    uint public constant burnOrDisburseTokensPeriod = 7 days;
+    uint public constant burnOrDisburseTokensPeriod = 30 minutes;
 
     // do not change this => disburse 100% rewards over `disburseDuration`
     uint public constant disbursePercentX100 = 100e2;
     
-    uint public constant EMERGENCY_WAIT_TIME = 3 days;
+    uint public constant EMERGENCY_WAIT_TIME = 5 minutes;
     
     uint public STAKING_FEE_RATE_X_100 = 0;
     uint public UNSTAKING_FEE_RATE_X_100 = 0;
@@ -1294,6 +1294,9 @@ contract FarmProRata is Ownable {
         uint[] memory minAmounts,
         uint _deadline
     ) private returns (uint) {
+        require(_rewardTokenReceived >= minAmounts[2], "Reward Token Received lower than expected!");
+        require(_baseTokenReceived >= minAmounts[3], "Base Token Received lower than expected!");
+
         uint oldLpBalance = IERC20(trustedDepositTokenAddress).balanceOf(address(this));
 
         IERC20(trustedRewardTokenAddress).safeApprove(address(uniswapRouterV2), 0);
