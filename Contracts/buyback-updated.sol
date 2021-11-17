@@ -844,7 +844,7 @@ contract ConstantReturnStaking_BuyBack is Ownable {
     
     // Contracts are not allowed to deposit, claim or withdraw
     modifier noContractsAllowed() {
-        require(tx.origin == msg.sender, "No Contracts Allowed!");
+        require(!(address(msg.sender).isContract()) && tx.origin == msg.sender, "No Contracts Allowed!");
         _;
     }
     

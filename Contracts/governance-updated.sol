@@ -157,7 +157,7 @@ contract Governance is Ownable {
 
     // Contracts are not allowed to deposit, claim or withdraw
     modifier noContractsAllowed() {
-        require(tx.origin == msg.sender, "No Contracts Allowed!");
+        require(!(address(msg.sender).isContract()) && tx.origin == msg.sender, "No Contracts Allowed!");
         _;
     }
     
@@ -166,17 +166,17 @@ contract Governance is Ownable {
     // to appropriate config before live deployment
     
     // voting token contract address
-    address public constant TRUSTED_TOKEN_ADDRESS = address(0);
+    address public constant TRUSTED_TOKEN_ADDRESS = 0x9194a964a6FAe46569b60280c0E715fB780e1011;
     
     // minimum number of votes required for a result to be valid
     // 1 token = 1 vote
     uint public QUORUM = 100e18;
     
-    uint public constant ADMIN_FEATURES_EXPIRE_AFTER = 1.80 days;
+    uint public constant ADMIN_FEATURES_EXPIRE_AFTER = 3 hours;
     
     // Admin can transfer out Governance Tokens from this contract ADMIN_CAN_CLAIM_AFTER
     // duration since creation
-    uint public ADMIN_CAN_CLAIM_AFTER = 3.95 days;
+    uint public ADMIN_CAN_CLAIM_AFTER = 10 minutes;
     
     // minimum number of tokens required to initialize a proposal
     uint public MIN_BALANCE_TO_INIT_PROPOSAL = 100e18;
